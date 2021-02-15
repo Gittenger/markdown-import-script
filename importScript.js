@@ -21,33 +21,33 @@ mongoose
 		err => console.error(err)
 	)
 
-const importData = async () => {
+const syncData = () => {
 	const files = fs.readdirSync(path.join(__dirname, 'assets'))
 
-	files.forEach(async file => {
+	const response = files.map(async file => {
 		const mdString = fs.readFileSync(
 			path.join(__dirname, 'assets', file),
 			'utf-8'
 		)
-		const {
-			content,
-			metadata: { title, excerpt, date },
-		} = metadataParser(mdString)
+		const { content, metadata } = metadataParser(mdString)
 
-		const doc = await Markdown.findOne({ title })
+		const doc = await Markdown.findOne({ title: metadata.title })
+
 		if (!doc) {
-			await Markdown.create({
-				text: content,
-				title,
-				excerpt,
-				date,
+			const newDoc = await Markdown.create({
+				content,
+				...metadata,
 			})
+			return newDoc
 		} else if (doc) {
-			await Markdown.findOneAndUpdate(
-				{ title },
-				{ text: content, title, date, excerpt }
-			)
+			const updated = await doc.updateOne({ content, ...metadata }).exec()
+			return updated
 		}
+	})
+
+	Promise.all(response).then(() => {
+		console.log('all done')
+		process.exit(0)
 	})
 }
 
@@ -58,11 +58,12 @@ const deleteData = async () => {
 		process.exit(0)
 	} catch (err) {
 		console.log(err)
+		process.exit(1)
 	}
 }
 
-if (process.argv[2] === '--import') {
-	importData()
+if (process.argv[2] === '--sync') {
+	syncData()
 } else if (process.argv[2] === '--delete') {
 	deleteData()
 } else {

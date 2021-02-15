@@ -4,8 +4,6 @@ excerpt: This is an excerpt of the article.
 date: October 7, 2019
 ---
 
-UPDATED
-
 <!-- Headings -->
 
 # Heading 1

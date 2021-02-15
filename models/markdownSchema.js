@@ -1,9 +1,9 @@
 const mongoose = require('mongoose')
 
 const markdownSchema = new mongoose.Schema({
-	text: {
+	content: {
 		type: String,
-		required: [true, 'Text is a required field'],
+		required: [true, 'Content is a required field'],
 	},
 	title: {
 		type: String,
